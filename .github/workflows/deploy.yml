@@ -20,6 +20,5 @@ jobs:
           aws-region: us-east-1
 
       - name: Sincronizar archivos a S3
-        # Esto copia el contenido de tu carpeta web/CodeQuiz al bucket
         run: |
-          aws s3 sync ./web/CodeQuiz/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
+          aws s3 sync ./web s3://${{ secrets.S3_BUCKET_NAME }} --delete

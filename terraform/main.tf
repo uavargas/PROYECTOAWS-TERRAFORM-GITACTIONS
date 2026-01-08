@@ -10,12 +10,11 @@ terraform {
 
 provider "aws" {
   region  = "us-east-1"
-  profile = "terraform" # User Profile
+  profile = "terraform" 
 }
 
 # 1. Creación del Bucket S3
 resource "aws_s3_bucket" "mi_web" {
-  
   bucket = "codequiz-web" 
 }
 
@@ -54,6 +53,12 @@ resource "aws_s3_bucket_policy" "permitir_acceso" {
     ]
   })
   
-  # Esto asegura que primero se abra el candado (public_access_block) y luego se ponga la regla
+  # Importante: Primero se quita el bloqueo y luego se aplica la política
   depends_on = [aws_s3_bucket_public_access_block.publico]
+}
+
+# 5. Mostrar la URL del sitio web al finalizar
+output "url_sitio_web" {
+  description = "URL para acceder a la web"
+  value       = aws_s3_bucket_website_configuration.sitio.website_endpoint
 }
