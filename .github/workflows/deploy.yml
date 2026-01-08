@@ -1,0 +1,25 @@
+name: Desplegar CodeQuiz a S3
+
+on:
+  push:
+    branches:
+      - main  # Se activa cada vez que haces "git push" a la rama main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar codigo del repo
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Sincronizar archivos a S3
+        # Esto copia el contenido de tu carpeta web/CodeQuiz al bucket
+        run: |
+          aws s3 sync ./web/CodeQuiz/ s3://${{ secrets.S3_BUCKET_NAME }} --delete

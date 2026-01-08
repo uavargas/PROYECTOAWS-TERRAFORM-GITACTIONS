@@ -1,0 +1,11 @@
+# Ignorar carpetas de binarios de Terraform
+**/.terraform/*
+
+# Ignorar archivos de estado (contienen información sensible)
+*.tfstate
+*.tfstate.*
+
+# Ignorar variables locales y logs
+crash.log
+*.tfvars
+.terraform.lock.hcl
