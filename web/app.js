@@ -946,7 +946,7 @@ function mostrarResultados() {
   const resultadoModal = document.getElementById("resultadosModal");
   document.getElementById(
     "resultadoTitulo"
-  ).textContent = `¡Felicidades ${nombreParticipante}!`;
+  ).textContent = `${nombreParticipante}, ¡Completaste el quiz !`;
   document.getElementById(
     "resultadoPuntaje"
   ).textContent = `Obtuviste ${puntaje} de ${total} respuestas correctas (${porcentaje.toFixed(
@@ -961,8 +961,8 @@ function mostrarResultados() {
 // Función para obtener feedback según el porcentaje
 function obtenerFeedback(porcentaje) {
   if (porcentaje >= 90) return "¡Excelente trabajo! Dominas este tema 💪";
-  if (porcentaje >= 70) return "¡Buen resultado! Sigue practicando 😊";
-  if (porcentaje >= 50) return "¡No está mal! Repasa los conceptos 📚";
+  if (porcentaje >= 70) return "¡Buen resultado! Sigue practicando, vas por buen camino 😊";
+  if (porcentaje >= 50) return "¡No estás mal! Repasa de nuevo los conceptos 📚";
   return "¡Sigue practicando! El conocimiento se construye paso a paso 💡";
 }
 
