@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeQuiz | Desafía tus conocimientos en Programación</title>
+    
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-    <!-- Modal para registrar participante -->
+
     <div id="participanteModal" class="modal hidden">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
@@ -21,7 +22,6 @@
         </div>
     </div>
 
-    <!-- Modal para mostrar resultados -->
     <div id="resultadosModal" class="modal hidden">
         <div class="modal-content">
             <h2 id="resultadoTitulo"></h2>
@@ -32,14 +32,13 @@
     </div>
 
     <div class="container">
-        <!-- Título principal -->
-        <header>
-            <h1><strong>CodeQuiz</strong> | Desafía tus conocimientos en Programación y Tecnología</h1>
+        
+        <header class="main-header">
+            <h1><strong>CodeQuiz</strong> <span class="divider">|</span> <small>Desafía tus conocimientos en Tecnología</small></h1>
         </header>
 
-        <!-- Contenedor de tarjetas de temas -->
         <main class="temas-container">
-            <!-- Tarjeta 1 - Lógica de Programación -->
+            
             <article class="tema-card" onclick="cargarTema('logica')">
                 <div class="tema-icon"><i class="fas fa-brain"></i></div>
                 <h2>Lógica de Programación</h2>
@@ -47,7 +46,6 @@
                 <div class="dificultad facil">Fácil</div>
             </article>
 
-            <!-- Tarjeta 2 - Java -->
             <article class="tema-card" onclick="cargarTema('java')">
                 <div class="tema-icon"><i class="fa-brands fa-java"></i></div>
                 <h2>Java</h2>
@@ -55,7 +53,6 @@
                 <div class="dificultad medio">Medio</div>
             </article>
 
-            <!-- Tarjeta 3 - Git y GitHub -->
             <article class="tema-card" onclick="cargarTema('git')">
                 <div class="tema-icon"><i class="fa-brands fa-git-alt"></i></div>
                 <h2>Git</h2>
@@ -63,7 +60,6 @@
                 <div class="dificultad facil">Fácil</div>
             </article>
 
-            <!-- Tarjeta 4 - AWS -->
             <article class="tema-card" onclick="cargarTema('aws')">
                 <div class="tema-icon"><i class="fa-brands fa-aws"></i></div>
                 <h2>AWS</h2>
@@ -71,7 +67,6 @@
                 <div class="dificultad medio">Medio</div>
             </article>
 
-            <!-- Tarjeta 5 - OCI -->
             <article class="tema-card" onclick="cargarTema('oracle')">
                 <div class="tema-icon"><i class="fas fa-cloud"></i></div>
                 <h2>ORACLE</h2>
@@ -79,7 +74,6 @@
                 <div class="dificultad medio">Medio</div>
             </article>
 
-            <!-- Tarjeta 6 - Desarrollo Web -->
             <article class="tema-card" onclick="cargarTema('desarrollo_web')">
                 <div class="tema-icon"><i class="fas fa-globe"></i></div>
                 <h2>Desarrollo Web</h2>
@@ -87,24 +81,21 @@
                 <div class="dificultad dificil">Difícil</div>
             </article>
 
-            <!-- Tarjeta 7 - Python -->
             <article class="tema-card" onclick="cargarTema('python')">
                 <div class="tema-icon"><i class="fa-brands fa-python"></i></div>
                 <h2>Python</h2>
-                <p>Lenguaje versátil ideal para automatización, web y ciencia de datos.</p>
+                <p>Lenguaje versátil ideal para automatización y ciencia de datos.</p>
                 <div class="dificultad medio">Medio</div>
             </article>
 
-            <!-- Tarjeta 8 - Bases de Datos -->
             <article class="tema-card" onclick="cargarTema('basesDeDatos')">
                 <div class="tema-icon"><i class="fas fa-database"></i></div>
                 <h2>Base de Datos</h2>
-                <p>Conceptos fundamentales de almacenamiento relacional y no relacional.</p>
+                <p>Conceptos fundamentales de almacenamiento relacional y NoSQL.</p>
                 <div class="dificultad medio">Medio</div>
             </article>
         </main>
 
-        <!-- Sección del Quiz (inicialmente oculta) -->
         <section id="quiz-container" class="hidden"></section>
     </div>
 
@@ -112,7 +103,11 @@
         <div class="footer-content">
             <div class="footer-info">
                 <p class="copyright">&copy; 2026 CodeQuiz | Desafía tus conocimientos en Tecnología</p>
-                <p class="credits">Creado con <span aria-label="amor">❤️</span> por AlonsoCode - Ing Infrastructure</p>
+                <p class="credits">
+                    Diseño y Arquitectura Cloud por 
+                    <span class="brand">AlonsoCode</span> | 
+                    <span class="role">Cloud Engineer</span>
+                </p>
             </div>
         </div>
     </footer>
