@@ -739,286 +739,244 @@ const preguntas = {
   python: [],
   basesDeDatos: [],
 };
+/**
+ * VARIABLES DE ESTADO Y CONFIGURACIÓN
+ */
+const API_URL = "https://10mhvrk89g.execute-api.us-east-1.amazonaws.com/score";
 
-// Variables de estado
 let temaActual = "";
 let preguntaActual = 0;
 let puntaje = 0;
 let nombreParticipante = "";
-let selecciones = []; // Para almacenar las selecciones en preguntas múltiples
-let timeoutId = null; // Para manejar el timeout de transición automática
+let selecciones = []; 
+let timeoutId = null;
 
-// Función para cargar un tema
+/**
+ * 1. ENVÍO DE DATOS AL BACKEND (AWS LAMBDA)
+ */
+async function procesarFinalizacion() {
+    // Si no hay nombre, regresamos al inicio sin enviar nada
+    if (!nombreParticipante) return volverAInicio();
+
+    console.log("Iniciando envío a AWS...", { nombreParticipante, puntaje });
+
+    try {
+        // Feedback visual en el botón
+        const botonesVolver = document.querySelectorAll(".btn-volver, .btn-resultado-volver");
+        botonesVolver.forEach(btn => btn.innerHTML = "⏳ Guardando...");
+
+        const respuesta = await fetch(API_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                userId: nombreParticipante, // Variable corregida
+                score: puntaje              // Variable corregida
+            })
+        });
+
+        if (respuesta.ok) {
+            console.log("✅ Datos guardados correctamente en DynamoDB");
+        } else {
+            console.error("❌ Error en respuesta del servidor:", respuesta.status);
+        }
+    } catch (error) {
+        console.error("❌ Error de red (CORS o Conexión):", error);
+    } finally {
+        // Siempre volvemos al inicio, falle o no el envío
+        volverAInicio();
+    }
+}
+
+/**
+ * 2. FLUJO DEL QUIZ
+ */
 function cargarTema(tema) {
-  const temasEnDesarrollo = ["git", "desarrollo_web", "python", "basesDeDatos"];
+    const temasEnDesarrollo = ["git", "desarrollo_web", "python", "basesDeDatos"];
+    if (temasEnDesarrollo.includes(tema)) {
+        alert("🚧 Desafío en desarrollo. ¡Próximamente más preguntas!");
+        return;
+    }
+    if (timeoutId) clearTimeout(timeoutId);
 
-  if (temasEnDesarrollo.includes(tema)) {
-    alert(
-      "🚧 Desafío en desarrollo. ¡Próximamente más preguntas! Esté Atento!!!"
-    );
-    return;
-  }
-
-  // Limpiar timeout existente si hay uno
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-    timeoutId = null;
-  }
-
-  // Reiniciar estado del quiz
-  temaActual = tema;
-  preguntaActual = 0;
-  puntaje = 0;
-  selecciones = [];
-
-  mostrarModal();
+    temaActual = tema;
+    preguntaActual = 0;
+    puntaje = 0;
+    selecciones = [];
+    mostrarModal();
 }
 
-// Función para mostrar el modal de nombre
 function mostrarModal() {
-  document.getElementById("participanteModal").classList.remove("hidden");
+    document.getElementById("participanteModal").classList.remove("hidden");
 }
 
-// Función para ocultar el modal de nombre
 function ocultarModal() {
-  document.getElementById("participanteModal").classList.add("hidden");
+    document.getElementById("participanteModal").classList.add("hidden");
 }
 
-// Función para iniciar el quiz
 function iniciarQuiz() {
-  nombreParticipante = document
-    .getElementById("nombreParticipante")
-    .value.trim();
+    const input = document.getElementById("nombreParticipante");
+    nombreParticipante = input.value.trim();
 
-  if (!nombreParticipante) {
-    alert("Por favor ingresa tu nombre");
-    return;
-  }
-
-  ocultarModal();
-  document.querySelector(".temas-container").classList.add("hidden");
-  document.getElementById("quiz-container").classList.remove("hidden");
-  mostrarPregunta();
-}
-
-// Función para mostrar la pregunta actual
-function mostrarPregunta() {
-  const quizContainer = document.getElementById("quiz-container");
-  const pregunta = preguntas[temaActual][preguntaActual];
-
-  // Reiniciar selecciones para la nueva pregunta
-  selecciones = [];
-
-  let opcionesHTML = "";
-
-  if (pregunta.tipo === "multiple") {
-    // Para preguntas múltiples, usar checkboxes con transición automática
-    opcionesHTML = `
-      <p class="multiple-note">Selecciona todas las opciones correctas:</p>
-      <div class="opciones-container">
-        ${pregunta.opciones
-          .map(
-            (opcion, index) => `
-          <label class="opcion checkbox-option">
-            <input type="checkbox" value="${index}" onchange="toggleSeleccion(${index})">
-            <span>${opcion}</span>
-          </label>
-        `
-          )
-          .join("")}
-      </div>
-    `;
-  } else {
-    // Para preguntas simples, usar botones como antes
-    opcionesHTML = `
-      <div class="opciones-container">
-        ${pregunta.opciones
-          .map(
-            (opcion, index) => `
-          <button class="opcion" onclick="seleccionarRespuestaSimple(${index})">
-            ${opcion}
-          </button>
-        `
-          )
-          .join("")}
-      </div>
-    `;
-  }
-
-  quizContainer.innerHTML = `
-    <div class="quiz-card">
-      <h2>${pregunta.pregunta}</h2>
-      ${opcionesHTML}
-      <div class="quiz-progress">
-        Pregunta ${preguntaActual + 1} de ${preguntas[temaActual].length}
-      </div>
-      <div class="volver-inicio">
-        <button onclick="volverAInicio()" class="btn-volver">⬅️ Volver al inicio</button>
-      </div>
-    </div>
-  `;
-}
-
-// Función para manejar la selección en preguntas múltiples (CORREGIDA)
-function toggleSeleccion(index) {
-  const pregunta = preguntas[temaActual][preguntaActual];
-  const pos = selecciones.indexOf(index);
-
-  if (pos === -1) {
-    selecciones.push(index);
-  } else {
-    selecciones.splice(pos, 1);
-  }
-
-  // Solo verificar si tenemos la misma cantidad de selecciones que respuestas correctas
-  if (selecciones.length === pregunta.correcta.length) {
-    // Verificar si la respuesta es correcta
-    const esCorrecta = arraysIguales(selecciones, pregunta.correcta);
-
-    // Deshabilitar todos los checkboxes
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach((cb) => (cb.disabled = true));
-
-    // Mostrar retroalimentación visual
-    checkboxes.forEach((checkbox, i) => {
-      const label = checkbox.closest("label");
-      if (pregunta.correcta.includes(i)) {
-        label.classList.add("correcta");
-      } else if (selecciones.includes(i) && !pregunta.correcta.includes(i)) {
-        label.classList.add("incorrecta");
-      }
-    });
-
-    // Sumar puntaje si es correcta
-    if (esCorrecta) {
-      puntaje++;
+    if (!nombreParticipante) {
+        alert("Por favor ingresa tu nombre");
+        return;
     }
 
-    // Transición automática después de 1.5 segundos
-    timeoutId = setTimeout(siguientePregunta, 1500);
-  }
-}
-
-// Función para seleccionar una respuesta simple
-function seleccionarRespuestaSimple(opcionIndex) {
-  const opciones = document.querySelectorAll(".opcion");
-  const pregunta = preguntas[temaActual][preguntaActual];
-
-  opciones.forEach((btn) => (btn.disabled = true));
-
-  if (opcionIndex === pregunta.correcta) {
-    opciones[opcionIndex].classList.add("correcta");
-    puntaje++;
-  } else {
-    opciones[opcionIndex].classList.add("incorrecta");
-    opciones[pregunta.correcta].classList.add("correcta");
-  }
-
-  timeoutId = setTimeout(siguientePregunta, 1500);
-}
-
-// Función para comparar dos arrays (para preguntas múltiples)
-function arraysIguales(a, b) {
-  if (a.length !== b.length) return false;
-  const sortedA = [...a].sort();
-  const sortedB = [...b].sort();
-  return sortedA.every((value, index) => value === sortedB[index]);
-}
-
-// Función para pasar a la siguiente pregunta
-function siguientePregunta() {
-  preguntaActual++;
-  if (preguntaActual < preguntas[temaActual].length) {
+    ocultarModal();
+    document.querySelector(".temas-container").classList.add("hidden");
+    document.getElementById("quiz-container").classList.remove("hidden");
     mostrarPregunta();
-  } else {
-    mostrarResultados();
-  }
 }
 
-// Función para mostrar los resultados finales
+/**
+ * 3. RENDERIZADO Y LÓGICA DE PREGUNTAS
+ */
+function mostrarPregunta() {
+    const quizContainer = document.getElementById("quiz-container");
+    const pregunta = preguntas[temaActual][preguntaActual];
+    selecciones = [];
+
+    let opcionesHTML = "";
+
+    if (pregunta.tipo === "multiple") {
+        opcionesHTML = `
+            <p class="multiple-note">Selecciona las opciones correctas:</p>
+            <div class="opciones-container">
+                ${pregunta.opciones.map((opcion, index) => `
+                    <label class="opcion checkbox-option">
+                        <input type="checkbox" value="${index}" onchange="toggleSeleccion(${index})">
+                        <span>${opcion}</span>
+                    </label>
+                `).join("")}
+            </div>`;
+    } else {
+        opcionesHTML = `
+            <div class="opciones-container">
+                ${pregunta.opciones.map((opcion, index) => `
+                    <button class="opcion" onclick="seleccionarRespuestaSimple(${index})">
+                        ${opcion}
+                    </button>
+                `).join("")}
+            </div>`;
+    }
+
+    quizContainer.innerHTML = `
+        <div class="quiz-card">
+            <h2>${pregunta.pregunta}</h2>
+            ${opcionesHTML}
+            <div class="quiz-progress">
+                Pregunta ${preguntaActual + 1} de ${preguntas[temaActual].length}
+            </div>
+            <div class="volver-inicio">
+                <button onclick="procesarFinalizacion()" class="btn-volver">⬅️ Volver al inicio</button>
+            </div>
+        </div>`;
+}
+
+function seleccionarRespuestaSimple(opcionIndex) {
+    const botones = document.querySelectorAll(".opcion");
+    const pregunta = preguntas[temaActual][preguntaActual];
+
+    botones.forEach(btn => btn.disabled = true);
+
+    if (opcionIndex === pregunta.correcta) {
+        botones[opcionIndex].classList.add("correcta");
+        puntaje++;
+    } else {
+        botones[opcionIndex].classList.add("incorrecta");
+        botones[pregunta.correcta].classList.add("correcta");
+    }
+
+    timeoutId = setTimeout(siguientePregunta, 1500);
+}
+
+function toggleSeleccion(index) {
+    const pregunta = preguntas[temaActual][preguntaActual];
+    const pos = selecciones.indexOf(index);
+
+    if (pos === -1) selecciones.push(index);
+    else selecciones.splice(pos, 1);
+
+    if (selecciones.length === pregunta.correcta.length) {
+        const esCorrecta = arraysIguales(selecciones, pregunta.correcta);
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        
+        checkboxes.forEach(cb => cb.disabled = true);
+        checkboxes.forEach((checkbox, i) => {
+            const label = checkbox.closest("label");
+            if (pregunta.correcta.includes(i)) label.classList.add("correcta");
+            else if (selecciones.includes(i)) label.classList.add("incorrecta");
+        });
+
+        if (esCorrecta) puntaje++;
+        timeoutId = setTimeout(siguientePregunta, 1500);
+    }
+}
+
+function arraysIguales(a, b) {
+    if (a.length !== b.length) return false;
+    return [...a].sort().every((val, index) => val === [...b].sort()[index]);
+}
+
+function siguientePregunta() {
+    preguntaActual++;
+    if (preguntaActual < preguntas[temaActual].length) {
+        mostrarPregunta();
+    } else {
+        mostrarResultados();
+    }
+}
+
+/**
+ * 4. PANTALLA DE RESULTADOS
+ */
 function mostrarResultados() {
-  const total = preguntas[temaActual].length;
-  const porcentaje = (puntaje / total) * 100;
+    const total = preguntas[temaActual].length;
+    const porcentaje = (puntaje / total) * 100;
 
-  document.getElementById("quiz-container").classList.add("hidden");
+    document.getElementById("quiz-container").classList.add("hidden");
+    const modal = document.getElementById("resultadosModal");
 
-  // Mostrar modal de resultados
-  const resultadoModal = document.getElementById("resultadosModal");
-  document.getElementById(
-    "resultadoTitulo"
-  ).textContent = `${nombreParticipante}, ¡Completaste el quiz !`;
-  document.getElementById(
-    "resultadoPuntaje"
-  ).textContent = `Obtuviste ${puntaje} de ${total} respuestas correctas (${porcentaje.toFixed(
-    1
-  )}%)`;
-  document.getElementById("resultadoFeedback").textContent =
-    obtenerFeedback(porcentaje);
+    document.getElementById("resultadoTitulo").textContent = `${nombreParticipante}, ¡Finalizaste!`;
+    document.getElementById("resultadoPuntaje").textContent = `Puntaje: ${puntaje} / ${total} (${porcentaje.toFixed(1)}%)`;
+    document.getElementById("resultadoFeedback").textContent = obtenerFeedback(porcentaje);
 
-  resultadoModal.classList.remove("hidden");
+    // Ajustar botón de cierre en resultados
+    const btnCerrar = modal.querySelector("button");
+    if (btnCerrar) {
+        btnCerrar.className = "btn-resultado-volver";
+        btnCerrar.onclick = procesarFinalizacion;
+    }
+
+    modal.classList.remove("hidden");
 }
 
-// Función para obtener feedback según el porcentaje
-function obtenerFeedback(porcentaje) {
-  if (porcentaje >= 90) return "¡Excelente trabajo! Dominas este tema 💪";
-  if (porcentaje >= 70) return "¡Buen resultado! Sigue practicando, vas por buen camino 😊";
-  if (porcentaje >= 50) return "¡No estás mal! Repasa de nuevo los conceptos 📚";
-  return "¡Sigue practicando! El conocimiento se construye paso a paso 💡";
+function obtenerFeedback(p) {
+    if (p >= 90) return "¡Excelente trabajo! 💪";
+    if (p >= 70) return "¡Buen resultado! 😊";
+    if (p >= 50) return "¡Puedes mejorar! 😐";
+    return "¡Sigue practicando! 💡";
 }
 
-// Función para volver al inicio
 function volverAInicio() {
-  // Limpiar timeout si existe
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-    timeoutId = null;
-  }
-
-  document.getElementById("quiz-container").classList.add("hidden");
-  document.getElementById("resultadosModal").classList.add("hidden");
-  document.querySelector(".temas-container").classList.remove("hidden");
+    if (timeoutId) clearTimeout(timeoutId);
+    document.getElementById("quiz-container").classList.add("hidden");
+    document.getElementById("resultadosModal").classList.add("hidden");
+    document.querySelector(".temas-container").classList.remove("hidden");
 }
 
-// Función para volver a los temas desde los resultados
-function volverATemas() {
-  document.getElementById("resultadosModal").classList.add("hidden");
-  document.querySelector(".temas-container").classList.remove("hidden");
-}
-
-// Event Listeners
-document.addEventListener("DOMContentLoaded", function () {
-  // Cerrar modal al hacer clic en la X
-  const closeModal = document.querySelector(".close-modal");
-  if (closeModal) {
-    closeModal.addEventListener("click", ocultarModal);
-  }
-
-  // Cerrar modal al hacer clic fuera del contenido
-  const participanteModal = document.getElementById("participanteModal");
-  if (participanteModal) {
-    participanteModal.addEventListener("click", function (e) {
-      if (e.target === this) {
-        ocultarModal();
-      }
-    });
-  }
-
-  // Manejar envío del formulario
-  const nombreForm = document.getElementById("nombreForm");
-  if (nombreForm) {
-    nombreForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      iniciarQuiz();
-    });
-  }
-
-  // Manejar enter en el campo de nombre
-  const nombreParticipanteInput = document.getElementById("nombreParticipante");
-  if (nombreParticipanteInput) {
-    nombreParticipanteInput.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
-        iniciarQuiz();
-      }
-    });
-  }
+/**
+ * 5. INICIALIZACIÓN
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("nombreForm");
+    if (form) {
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            iniciarQuiz();
+        });
+    }
 });
