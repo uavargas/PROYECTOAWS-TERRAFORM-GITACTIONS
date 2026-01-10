@@ -78,17 +78,19 @@ El desarrollo y despliegue del proyecto se realizo con los siguientes pasos:
 
 ```text
 .
-├── .github/workflows/        # Pipelines de CI/CD (GitHub Actions)
-├── terraform/                # Infraestructura como Código (IaC)
-│   ├── main.tf               # S3, CloudFront, Lambda, DynamoDB, SNS
-│   ├── variables.tf          # Variables de configuración
-│   └── outputs.tf            # URLs de API y CloudFront
-├── lambda/                   # Backend serverless
-│   └── index.py              # Lógica en Python (DynamoDB y SNS)
-└── web/                      # Frontend
-    ├── index.html            # Interfaz de usuario
-    ├── style.css             # Diseño responsivo
-    └── app.js                # Consumo de la API (Fetch)
+├── .github/                # Configuración de automatización (Workflows)
+├── docs/                   # Documentación y recursos visuales (Imágenes del README)
+│   └── img/                # Capturas de la arquitectura e interfaz
+├── terraform/              # Infraestructura como Código (IaC)
+│   ├── main.tf             # Definición de recursos (S3, CloudFront, Lambda, etc.)
+│   ├── variables.tf        # Variables globales del proyecto
+│   └── outputs.tf          # Salida de datos (URL del API y CloudFront)
+├── web/                    # Frontend de la aplicación
+│   ├── index.html          # Estructura del juego
+│   ├── style.css           # Diseño y estilos visuales
+│   └── app.js              # Lógica de cliente y conexión con AWS (Fetch)
+├── .gitignore              # Archivos excluidos de Git (terraform.tfstate, etc.)
+└── README.md               # Documentación principal del proyecto
 ```
 
 ---
