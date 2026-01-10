@@ -11,7 +11,7 @@
 
 **CodeQuiz** es una aplicación de **quiz técnico** desarrollada con fines educativos y de práctica, pensada especialmente para personas que están dando sus primeros pasos en tecnología.
 
-La aplicación está desplegada en **AWS** utilizando una **arquitectura serverless**, combinando servicios como **CloudFront, S3, API Gateway, Lambda, DynamoDB y SNS** para lograr una solución **escalable, segura y altamente disponible**.
+Con fines de practica en arquitectura e infraestructura, la aplicación está desplegada en **AWS** utilizando una **arquitectura serverless**, combinando servicios como **CloudFront, S3, API Gateway, Lambda, DynamoDB y SNS** para lograr una solución **escalable, segura y altamente disponible**.
 
 Toda la infraestructura se gestiona mediante **Terraform (IaC)**, lo que permite despliegues consistentes y reproducibles. Además, cuenta con un **pipeline de CI/CD con GitHub Actions** que automatiza el despliegue de infraestructura y backend.
 
@@ -20,12 +20,9 @@ Toda la infraestructura se gestiona mediante **Terraform (IaC)**, lo que permite
 
 🌐 **Demo en vivo:** https://d2cj6j92jllyde.cloudfront.net
 
-![AWS](...)
-
+---
 
 ## 🏗️ Arquitectura
-
-### Arquitectura de Nube
 
 ![Arquitectura del Sistema](docs/img/Infra-CodeQuiz.drawio.png)
 
@@ -151,7 +148,7 @@ web/app.js
 ## 👨‍💻 Autor
 
 **Desarrollado por:** Alonso Vargas  
-**LinkedIn:** Tu Enlace
+**Ingeniero de Telecomunicaciones:**
 
 ---
 
