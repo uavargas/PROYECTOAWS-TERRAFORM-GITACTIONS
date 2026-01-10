@@ -17,6 +17,12 @@ Toda la infraestructura se gestiona mediante **Terraform (IaC)**, lo que permite
 
 ---
 
+
+🌐 **Demo en vivo:** https://d2cj6j92jllyde.cloudfront.net
+
+![AWS](...)
+
+
 ## 🏗️ Arquitectura
 
 ### Arquitectura de Nube
@@ -31,7 +37,7 @@ Toda la infraestructura se gestiona mediante **Terraform (IaC)**, lo que permite
 
 ## 🔄 Flujo de Trabajo del Proyecto
 
-El desarrollo y despliegue del proyecto siguió un ciclo de vida de ingeniería completo:
+El desarrollo y despliegue del proyecto se realizo con los siguientes pasos:
 
 1. **Configuración del Entorno**  
    Se estableció la comunicación con AWS mediante el **AWS CLI**, configurando credenciales seguras para permitir despliegues automatizados.
